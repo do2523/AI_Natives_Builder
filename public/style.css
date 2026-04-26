@@ -2,6 +2,12 @@ body {
   font-family: Arial, sans-serif;
   background: #f7f3ee;
   padding: 30px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 h1 {
@@ -14,12 +20,13 @@ section {
   margin-bottom: 20px;
   border-radius: 12px;
   max-width: 600px;
+  width: 100%;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 input {
   display: block;
-  width: 95%;
+  width: 100%;
   padding: 10px;
   margin: 10px 0;
 }
@@ -42,4 +49,31 @@ button:hover {
   padding: 12px;
   margin-top: 10px;
   border-radius: 8px;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 600px) {
+  body {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    text-align: center;
+  }
+
+  section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  input,
+  button {
+    font-size: 1rem;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+  }
 }
