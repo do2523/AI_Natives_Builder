@@ -1,7 +1,8 @@
 const express = require("express");
-const mysql = require("mysql2");
+const { Pool } = require("pg");
 const cors = require("cors");
 const path = require("path");
+require("dotenv").config();
 
 const app = express();
 
@@ -9,57 +10,63 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "admin@123",
-  database: "PizzeriaDB",
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-db.connect((err) => {
-  if (err) {
+db.connect()
+  .then(() => {
+    console.log("Connected to Supabase PostgreSQL database");
+  })
+  .catch((err) => {
     console.error("Database connection failed:", err);
-    return;
-  }
-  console.log("Connected to MySQL database");
-});
+  });
 
-app.post("/api/customers", (req, res) => {
+app.post("/api/customers", async (req, res) => {
   const { customerID, name, phone, email } = req.body;
 
   const sql = `
     INSERT INTO Customer (CustomerID, Name, Phone, Email)
-    VALUES (?, ?, ?, ?)
+    VALUES ($1, $2, $3, $4)
   `;
 
-  db.query(sql, [customerID, name, phone, email], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    await db.query(sql, [customerID, name, phone, email]);
     res.json({ message: "Customer added successfully" });
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post("/api/orders", (req, res) => {
+app.post("/api/orders", async (req, res) => {
   const { orderID, orderDate, status, customerID } = req.body;
 
   const sql = `
-    INSERT INTO \`Order\`
+    INSERT INTO Orders
     (OrderID, OrderDate, Status, CustomerID, Delivery_DriverEmployeeID, WaiterEmployeeID)
-    VALUES (?, ?, ?, ?, NULL, NULL)
+    VALUES ($1, $2, $3, $4, NULL, NULL)
   `;
 
-  db.query(sql, [orderID, orderDate, status, customerID], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    await db.query(sql, [orderID, orderDate, status, customerID]);
     res.json({ message: "Order added successfully" });
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.get("/api/orders", (req, res) => {
-  const sql = "SELECT * FROM `Order`";
+app.get("/api/orders", async (req, res) => {
+  const sql = "SELECT * FROM Orders";
 
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+  try {
+    const result = await db.query(sql);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.listen(3000, () => {
