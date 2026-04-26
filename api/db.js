@@ -1,10 +1,12 @@
 const { Pool } = require("pg");
 
+const connectionString = process.env.POSTGRES_URL.replace(
+  "sslmode=require",
+  "sslmode=no-verify",
+);
+
 const db = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  connectionString,
 });
 
 module.exports = db;
