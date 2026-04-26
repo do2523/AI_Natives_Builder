@@ -16,8 +16,8 @@ module.exports = async function handler(req, res) {
       [customerID, name, phone, email],
     );
 
-    res.status(200).json({ message: "Customer added successfully" });
+    return res.status(200).json({ message: "Customer added successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
